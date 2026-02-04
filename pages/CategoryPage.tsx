@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
 import ProductCard from '../components/ProductCard';
+import { useProducts } from '../context/ProductContext';
 
 interface CategoryPageProps {
   wishlist: string[];
@@ -11,7 +11,9 @@ interface CategoryPageProps {
 
 const CategoryPage: React.FC<CategoryPageProps> = ({ wishlist, onToggleWishlist }) => {
   const { id } = useParams<{ id: string }>();
-  const filteredProducts = PRODUCTS.filter(p => p.category === id);
+  const { products } = useProducts();
+  
+  const filteredProducts = products.filter(p => p.category === id);
 
   return (
     <div className="p-4 animate-slide-in-right">

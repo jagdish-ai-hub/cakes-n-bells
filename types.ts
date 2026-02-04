@@ -1,7 +1,8 @@
 
 export type Category = 'Cake' | 'Confectionery';
 
-export type Section = 'Birthday Cakes' | 'Anniversary Cakes' | 'Celebration Cakes';
+// Changed from union type to string to support dynamic sections
+export type Section = string;
 
 export type PaymentTier = 'standard' | 'premium' | 'luxury';
 

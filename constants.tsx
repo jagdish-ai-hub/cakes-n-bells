@@ -9,6 +9,8 @@ export const TIER_UPI_IDS: Record<PaymentTier, string> = {
   luxury: '9322820147-2@axl'      
 };
 
+export const DEFAULT_SECTIONS = ['Birthday Cakes', 'Anniversary Cakes', 'Celebration Cakes'];
+
 export const PRODUCTS: Product[] = [
   // --- STANDARD CAKES (Tier: standard) ---
   {
@@ -20,7 +22,7 @@ export const PRODUCTS: Product[] = [
     prices: { '0.5kg': 380, '1kg': 700 },
     images: [
       'https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1517427294546-5aa12163d019?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -45,8 +47,8 @@ export const PRODUCTS: Product[] = [
     description: 'Crunchy butterscotch bits paired with a smooth caramel-infused cream. A nostalgic flavor that never fails to delight.',
     prices: { '0.5kg': 380, '1kg': 700 },
     images: [
-      'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1562277129-c421758af039?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -58,8 +60,8 @@ export const PRODUCTS: Product[] = [
     description: 'Made with real Alphonso mango pulp and fresh cream. This seasonal favorite is light, refreshing, and burst with tropical flavor.',
     prices: { '0.5kg': 380, '1kg': 700 },
     images: [
-      'https://images.unsplash.com/photo-1596451190630-186aff535bf2?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1602351447937-745cb720612f?auto=format&fit=crop&q=80&w=800'
+      'https://drive.google.com/thumbnail?id=1cBKfJw4_gVb473_b_aRaVjvHwF0n6o4M&sz=w1000',
+      'https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -72,7 +74,7 @@ export const PRODUCTS: Product[] = [
     prices: { '0.5kg': 380, '1kg': 700 },
     images: [
       'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1464349141505-f93309a4d8c1?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1586985289066-63f6831c21f9?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -84,8 +86,8 @@ export const PRODUCTS: Product[] = [
     description: 'Classic tropical treat with juicy pineapple chunks and vanilla whipped cream. Garnished with a glazed cherry.',
     prices: { '0.5kg': 380, '1kg': 700 },
     images: [
-      'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1551807501-807089c74574?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1506459225024-1428097a7e18?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -99,8 +101,8 @@ export const PRODUCTS: Product[] = [
     description: 'Indulgent cake layered with premium blueberry compote. The perfect blend of tangy and sweet for sophisticated palates.',
     prices: { '0.5kg': 400, '1kg': 760 },
     images: [
-      'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1563729768640-d813a21e69da?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1619985632461-13352f504381?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'premium'
   },
@@ -112,8 +114,8 @@ export const PRODUCTS: Product[] = [
     description: 'An exquisite fusion of traditional Indian Rasmalai and Western patisserie. Topped with pistachios, rose petals, and saffron strands.',
     prices: { '0.5kg': 400, '1kg': 760 },
     images: [
-      'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1562277129-c421758af039?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1605807646983-377bc5a76493?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'premium'
   },
@@ -125,8 +127,8 @@ export const PRODUCTS: Product[] = [
     description: 'A colorful cornucopia of seasonal fresh fruits layered in light cream. Fresh, healthy, and absolutely delicious.',
     prices: { '0.5kg': 400, '1kg': 760 },
     images: [
-      './mixed-fruit.jpg',
-      'https://images.unsplash.com/photo-1464349141505-f93309a4d8c1?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1488477304112-4944851de03d?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'premium'
   },
@@ -140,8 +142,8 @@ export const PRODUCTS: Product[] = [
     description: 'The ultimate for chocolate lovers. Rich dark chocolate ganache between layers of moist cocoa sponge.',
     prices: { '0.5kg': 420, '1kg': 820 },
     images: [
-      'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
   },
@@ -153,8 +155,8 @@ export const PRODUCTS: Product[] = [
     description: 'Creamy hazelnut spread mixed with rich chocolate ganache. Topped with roasted hazelnut pieces for extra crunch.',
     prices: { '0.5kg': 420, '1kg': 820 },
     images: [
-      'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
   },
@@ -167,7 +169,7 @@ export const PRODUCTS: Product[] = [
     prices: { '0.5kg': 420, '1kg': 820 },
     images: [
       'https://images.unsplash.com/photo-1508737804141-4c3b688e2546?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
   },
@@ -180,7 +182,7 @@ export const PRODUCTS: Product[] = [
     prices: { '0.5kg': 420, '1kg': 820 },
     images: [
       'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
   },
@@ -194,8 +196,8 @@ export const PRODUCTS: Product[] = [
     description: 'Creamy baked cheesecake on a Lotus Biscoff biscuit base, topped with Biscoff spread and cookie crumbs.',
     prices: { '0.5kg': 430, '1kg': 820 },
     images: [
-      'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
   },
@@ -207,7 +209,7 @@ export const PRODUCTS: Product[] = [
     description: 'Classic velvety cheesecake topped with our house-made blueberry preserve. A timeless elegance.',
     prices: { '0.5kg': 430, '1kg': 820 },
     images: [
-      'https://images.unsplash.com/photo-1524351199679-46cddfdb52c7?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1626803775151-61d756612fcd?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
@@ -220,8 +222,8 @@ export const PRODUCTS: Product[] = [
     description: 'A summer delight featuring smooth cheesecake swirled with fresh mango puree and topped with fresh fruit.',
     prices: { '0.5kg': 430, '1kg': 820 },
     images: [
-      'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1524351199679-46cddfdb52c7?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1627054247563-3a5a755d9b4b?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1519340333755-56e9c1d04579?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
   },
@@ -234,7 +236,7 @@ export const PRODUCTS: Product[] = [
     prices: { '0.5kg': 430, '1kg': 820 },
     images: [
       'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1464349141505-f93309a4d8c1?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'luxury'
   },
@@ -248,8 +250,8 @@ export const PRODUCTS: Product[] = [
     description: 'The soul of Parsi baking. Rich, dense, and full of aromatic cardamom and mawa. Best enjoyed with tea.',
     prices: { 'piece': 199 },
     images: [
-      'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1602351447937-745cb720612f?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -262,7 +264,7 @@ export const PRODUCTS: Product[] = [
     prices: { 'piece': 39 },
     images: [
       'https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1505394033641-40c6ad1178d1?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -275,7 +277,7 @@ export const PRODUCTS: Product[] = [
     prices: { 'piece': 49 },
     images: [
       'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1612240498936-31f880609590?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -288,7 +290,7 @@ export const PRODUCTS: Product[] = [
     prices: { 'piece': 89 },
     images: [
       'https://images.unsplash.com/photo-1614707267537-b85af00c4b81?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },
@@ -300,8 +302,8 @@ export const PRODUCTS: Product[] = [
     description: 'Decadent, fudgy chocolate brownies that melt in your mouth. Made with premium Belgian chocolate.',
     prices: { 'piece': 70 },
     images: [
-      'https://images.unsplash.com/photo-1461009112677-30af47b50d88?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1624353339078-ad4037199852?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1610611382875-52b6540c7931?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1515037893149-de7f840978e2?auto=format&fit=crop&q=80&w=800'
     ],
     paymentTier: 'standard'
   },

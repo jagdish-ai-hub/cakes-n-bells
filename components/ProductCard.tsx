@@ -16,12 +16,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isWishlisted, onTogg
 
   return (
     <div className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-pink-50">
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative aspect-square overflow-hidden bg-gray-100">
         <Link to={`/product/${product.id}`}>
           <img 
             src={product.images[0]} 
             alt={product.name} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              // Fallback to a clean placeholder instead of broken image
+              e.currentTarget.src = 'https://placehold.co/600x600/fce7f3/db2777?text=No+Image';
+            }}
           />
         </Link>
         <button 

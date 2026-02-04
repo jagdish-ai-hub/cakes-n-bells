@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
 import ProductCard from '../components/ProductCard';
+import { useProducts } from '../context/ProductContext';
 
 interface WishlistPageProps {
   wishlist: string[];
@@ -10,7 +10,8 @@ interface WishlistPageProps {
 }
 
 const WishlistPage: React.FC<WishlistPageProps> = ({ wishlist, onToggleWishlist }) => {
-  const wishlistedProducts = PRODUCTS.filter(p => wishlist.includes(p.id));
+  const { products } = useProducts();
+  const wishlistedProducts = products.filter(p => wishlist.includes(p.id));
 
   return (
     <div className="p-4 animate-in fade-in slide-in-from-bottom-5 duration-500">

@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CustomerDetails, OrderItem, Product, PaymentTier } from '../types';
-import { WHATSAPP_NUMBER, PRODUCTS, TIER_UPI_IDS } from '../constants';
+import { WHATSAPP_NUMBER, TIER_UPI_IDS } from '../constants';
+import { useProducts } from '../context/ProductContext';
 
 interface PaymentProps {
   lastOrder?: {
@@ -13,16 +14,17 @@ interface PaymentProps {
 
 const Payment: React.FC<PaymentProps> = ({ lastOrder }) => {
   const navigate = useNavigate();
+  const { products } = useProducts();
   const [productDetails, setProductDetails] = useState<Product | undefined>(undefined);
 
   useEffect(() => {
     if (!lastOrder) {
       navigate('/');
     } else {
-      const p = PRODUCTS.find(prod => prod.id === lastOrder.item.productId);
+      const p = products.find(prod => prod.id === lastOrder.item.productId);
       setProductDetails(p);
     }
-  }, [lastOrder, navigate]);
+  }, [lastOrder, navigate, products]);
 
   if (!lastOrder) return null;
 

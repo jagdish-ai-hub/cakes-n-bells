@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
+import { useProducts } from '../context/ProductContext';
 
 interface ProductDetailProps {
   wishlist: string[];
@@ -11,7 +11,8 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ wishlist, onToggleWishlist }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const product = PRODUCTS.find(p => p.id === id);
+  const { products } = useProducts();
+  const product = products.find(p => p.id === id);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [selectedWeight, setSelectedWeight] = useState<string>('');
@@ -88,6 +89,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ wishlist, onToggleWishlis
                 src={img} 
                 alt={`${product.name} view ${idx + 1}`} 
                 className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  // Fallback to generic placeholder
+                  e.currentTarget.src = 'https://placehold.co/600x800/fce7f3/db2777?text=No+Image';
+                }}
               />
             </div>
           ))}

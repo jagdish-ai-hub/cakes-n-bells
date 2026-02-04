@@ -7,8 +7,10 @@ import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import Payment from './pages/Payment';
 import WishlistPage from './pages/WishlistPage';
+import AdminPage from './pages/AdminPage';
 import Navbar from './components/Navbar';
 import { CustomerDetails, OrderItem } from './types';
+import { ProductProvider } from './context/ProductContext';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -75,27 +77,30 @@ const App: React.FC = () => {
   };
 
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="min-h-screen bg-[#fffafa] flex flex-col font-sans selection:bg-pink-100 selection:text-pink-600">
-        <Navbar 
-          wishlistCount={wishlist.length} 
-          canInstall={!!deferredPrompt} 
-          onInstall={handleInstallClick} 
-        />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
-            <Route path="/category/:id" element={<CategoryPage wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
-            <Route path="/product/:id" element={<ProductDetail wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
-            <Route path="/checkout" element={<Checkout setLastOrder={setLastOrder} />} />
-            <Route path="/payment" element={<Payment lastOrder={lastOrder} />} />
-            <Route path="/wishlist" element={<WishlistPage wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
-            <Route path="*" element={<Home wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <ProductProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="min-h-screen bg-[#fffafa] flex flex-col font-sans selection:bg-pink-100 selection:text-pink-600">
+          <Navbar 
+            wishlistCount={wishlist.length} 
+            canInstall={!!deferredPrompt} 
+            onInstall={handleInstallClick} 
+          />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Home wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
+              <Route path="/category/:id" element={<CategoryPage wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
+              <Route path="/product/:id" element={<ProductDetail wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
+              <Route path="/checkout" element={<Checkout setLastOrder={setLastOrder} />} />
+              <Route path="/payment" element={<Payment lastOrder={lastOrder} />} />
+              <Route path="/wishlist" element={<WishlistPage wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="*" element={<Home wishlist={wishlist} onToggleWishlist={toggleWishlist} />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </ProductProvider>
   );
 };
 

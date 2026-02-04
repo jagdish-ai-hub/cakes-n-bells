@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { PRODUCTS } from '../constants';
+import { useProducts } from '../context/ProductContext';
 
 interface HomeProps {
   wishlist: string[];
@@ -32,20 +32,22 @@ const calculateRelevance = (query: string, text: string): number => {
   return score > 20 ? score : 0;
 };
 
-function Home({ wishlist, onToggleWishlist }: HomeProps) {
+export default function Home({ wishlist, onToggleWishlist }: HomeProps) {
   const navigate = useNavigate();
-  const sections = ['Birthday Cakes', 'Anniversary Cakes', 'Celebration Cakes'];
-  const confectioneryProducts = PRODUCTS.filter(p => p.category === 'Confectionery');
+  const { products, sections } = useProducts();
+  
+  const confectioneryProducts = products.filter(p => p.category === 'Confectionery');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [showContributor, setShowContributor] = useState(false);
 
   // Search Logic
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
 
     // 1. Exact/Substring/Fuzzy matches
-    let matches = PRODUCTS.map(p => ({
+    const matches = products.map(p => ({
       product: p,
       score: calculateRelevance(searchQuery, p.name)
     })).filter(r => r.score > 0);
@@ -59,19 +61,19 @@ function Home({ wishlist, onToggleWishlist }: HomeProps) {
     }
 
     // 2. Fallback to default popular cakes if no matches found
-    const defaults = PRODUCTS.filter(p => 
+    const defaults = products.filter(p => 
       ['blackforest', 'vanilla', 'choco-truffle', 'pineapple'].includes(p.id)
     );
     return defaults;
-  }, [searchQuery]);
+  }, [searchQuery, products]);
 
   // Determine if we are showing fallback results
   const isFallback = searchQuery.trim().length > 0 && 
                      searchResults.length > 0 && 
-                     !PRODUCTS.some(p => calculateRelevance(searchQuery, p.name) > 0);
+                     !products.some(p => calculateRelevance(searchQuery, p.name) > 0);
 
   return (
-    <div className="animate-fade-in-up pb-20">
+    <div className="animate-fade-in-up">
       {/* Hero Header */}
       <section className="px-6 pt-12 pb-6 bg-gradient-to-b from-pink-50 to-transparent text-center">
         <div className="inline-block px-4 py-1.5 bg-white rounded-full shadow-sm text-pink-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-pink-100">
@@ -142,34 +144,37 @@ function Home({ wishlist, onToggleWishlist }: HomeProps) {
         </div>
       </section>
 
-      {/* Featured Sections - CAKES */}
-      {sections.map((sectionName) => (
-        <section key={sectionName} className="py-8">
-          <div className="px-6 mb-6 flex justify-between items-end">
-            <div>
-              <span className="text-pink-500 font-black text-[10px] tracking-widest uppercase mb-1 block">Collection</span>
-              <h2 className="text-3xl font-black text-gray-900 font-serif tracking-tight">{sectionName}</h2>
-            </div>
-            <Link to={`/category/Cake`} className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 shadow-sm active:scale-90 transition-transform">
-              <i className="fas fa-arrow-right text-xs"></i>
-            </Link>
-          </div>
-          
-          <div className="flex overflow-x-auto gap-5 px-6 pb-6 hide-scrollbar">
-            {PRODUCTS
-              .filter(p => p.category === 'Cake' && p.sections.includes(sectionName as any))
-              .map((product) => (
-              <div key={product.id} className="min-w-[220px] w-[220px]">
-                <ProductCard 
-                  product={product} 
-                  isWishlisted={wishlist.includes(product.id)}
-                  onToggleWishlist={onToggleWishlist}
-                />
+      {/* Featured Sections - Dynamically Loaded from Context */}
+      {sections.map((sectionName) => {
+        const sectionProducts = products.filter(p => p.category === 'Cake' && p.sections.includes(sectionName));
+        if (sectionProducts.length === 0) return null;
+
+        return (
+          <section key={sectionName} className="py-8">
+            <div className="px-6 mb-6 flex justify-between items-end">
+              <div>
+                <span className="text-pink-500 font-black text-[10px] tracking-widest uppercase mb-1 block">Collection</span>
+                <h2 className="text-3xl font-black text-gray-900 font-serif tracking-tight">{sectionName}</h2>
               </div>
-            ))}
-          </div>
-        </section>
-      ))}
+              <Link to={`/category/Cake`} className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 shadow-sm active:scale-90 transition-transform">
+                <i className="fas fa-arrow-right text-xs"></i>
+              </Link>
+            </div>
+            
+            <div className="flex overflow-x-auto gap-5 px-6 pb-6 hide-scrollbar">
+              {sectionProducts.map((product) => (
+                <div key={product.id} className="min-w-[220px] w-[220px]">
+                  <ProductCard 
+                    product={product} 
+                    isWishlisted={wishlist.includes(product.id)}
+                    onToggleWishlist={onToggleWishlist}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
       {/* Confectionery Section */}
       {confectioneryProducts.length > 0 && (
@@ -210,17 +215,54 @@ function Home({ wishlist, onToggleWishlist }: HomeProps) {
       </section>
 
       {/* Brand Ethos */}
-      <section className="px-6 py-16 text-center bg-white mt-8 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
+      <section className="px-6 pt-16 pb-10 text-center bg-white mt-8 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
         <div className="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-pink-100">
           <i className="fas fa-birthday-cake text-pink-400 text-3xl"></i>
         </div>
         <h3 className="text-2xl font-black mb-3 tracking-tight font-serif text-gray-900">Baked to Perfection</h3>
-        <p className="text-gray-400 max-w-xs mx-auto text-sm font-medium leading-relaxed">
+        <p className="text-gray-400 max-w-xs mx-auto text-sm font-medium leading-relaxed mb-10">
           Every order is baked fresh daily using premium ingredients because you deserve nothing but the best.
         </p>
+
+        {/* Footer with Vertical Stack */}
+        <footer className="border-t border-gray-100 pt-10 pb-16 flex flex-col items-center space-y-4">
+          {/* 1. Admin Login */}
+          <Link to="/admin" className="text-gray-300 hover:text-pink-500 text-[10px] font-bold uppercase tracking-widest transition-colors">
+             Admin Login
+          </Link>
+
+          {/* 2. Developer */}
+          <button 
+             onClick={() => setShowContributor(true)}
+             className="text-gray-300 hover:text-pink-500 text-[10px] font-bold uppercase tracking-widest transition-colors"
+          >
+             Developer - Jagdish
+          </button>
+          
+          {/* 3. Copyright */}
+          <p className="text-gray-200 text-[10px] font-medium tracking-wide mt-2">© 2024 Cakes N Bells</p>
+        </footer>
       </section>
+
+      {/* Contributor Popup */}
+      {showContributor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in-up" onClick={() => setShowContributor(false)}>
+          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-xs w-full text-center m-4" onClick={e => e.stopPropagation()}>
+             <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+               <i className="fas fa-code text-pink-500 text-2xl"></i>
+             </div>
+             <h3 className="text-xl font-bold text-gray-800 font-serif mb-2">Project Contributor</h3>
+             <p className="text-gray-600 font-bold text-lg mb-1">Jagdish</p>
+             <p className="text-gray-400 text-sm mb-6">jagadish.omm@gmail.com</p>
+             <button 
+               onClick={() => setShowContributor(false)}
+               className="px-6 py-2 bg-pink-500 text-white rounded-full font-bold shadow-lg shadow-pink-200"
+             >
+               Close
+             </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-export default Home;
