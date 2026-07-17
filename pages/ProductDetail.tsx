@@ -11,7 +11,7 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ wishlist, onToggleWishlist }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
   const product = products.find(p => p.id === id);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -35,6 +35,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ wishlist, onToggleWishlis
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="text-center animate-pulse">
+          <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-pink-600 text-sm font-bold tracking-wider uppercase">Loading Product Details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

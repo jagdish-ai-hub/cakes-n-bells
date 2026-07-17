@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A premium cake or confectionery product in the store",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the product"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the product"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Cake", "Confectionery"],
+          "description": "Product category"
+        },
+        "sections": {
+          "type": "array",
+          "description": "Sections where the product is shown"
+        },
+        "description": {
+          "type": "string",
+          "description": "Product description"
+        },
+        "prices": {
+          "type": "object",
+          "description": "Prices map by weight or piece"
+        },
+        "images": {
+          "type": "array",
+          "description": "List of product image URLs"
+        },
+        "paymentTier": {
+          "type": "string",
+          "enum": ["standard", "premium", "luxury"],
+          "description": "QR code payment tier"
+        }
+      },
+      "required": ["id", "name", "category", "sections", "description", "prices", "images", "paymentTier"]
+    },
+    "Section": {
+      "title": "Section",
+      "description": "A dynamic display section for organizing products on the home page",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique ID or name of the section"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the section"
+        }
+      },
+      "required": ["id", "name"]
+    }
+  },
+  "firestore": {
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "Store products collection"
+    },
+    "sections/{sectionId}": {
+      "schema": "Section",
+      "description": "Display sections collection"
+    }
+  }
+}

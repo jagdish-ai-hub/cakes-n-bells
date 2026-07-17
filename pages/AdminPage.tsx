@@ -1,17 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useProducts } from '../context/ProductContext';
 import { Product, PaymentTier, Category } from '../types';
 import { Link } from 'react-router-dom';
+import { db } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { GoogleGenAI } from '@google/genai';
 
 // Simple ID generator if uuid isn't available in environment
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export default function AdminPage() {
-  const { products, sections, addProduct, updateProduct, deleteProduct, addSection, deleteSection } = useProducts();
+  const { products, sections, addProduct, updateProduct, deleteProduct, addSection, deleteSection, loading } = useProducts();
+  
+  // --- SIMPLE LOCK STATES ---
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
+  const [passcode, setPasscode] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [isCheckingLogin, setIsCheckingLogin] = useState(false);
+
+  const [showPasscodeForm, setShowPasscodeForm] = useState(false);
+  const [oldPasscode, setOldPasscode] = useState('');
+  const [newPasscode, setNewPasscode] = useState('');
+  const [confirmPasscode, setConfirmPasscode] = useState('');
+  const [passcodeMessage, setPasscodeMessage] = useState('');
+  const [isUpdatingPasscode, setIsUpdatingPasscode] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -31,37 +44,124 @@ export default function AdminPage() {
   };
 
   const [formData, setFormData] = useState<Product>(emptyProduct);
+  const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
 
-  // --- AUTHENTICATION LOGIC (HASHING) ---
+  const handleGenerateDescription = async () => {
+    if (!formData.name) {
+      alert("Please enter a product name first.");
+      return;
+    }
+    setIsGeneratingDesc(true);
+    try {
+      const apiKey = import.meta.env.VITE_API_KEY;
+      if (!apiKey) {
+        alert("VITE_API_KEY environment variable is missing.");
+        setIsGeneratingDesc(false);
+        return;
+      }
+      const ai = new GoogleGenAI({ apiKey });
+      const prompt = `Write a short, appetizing, and appealing product description (2-3 sentences) for a bakery item. Name: ${formData.name || 'Unknown item'}. Category: ${formData.category || 'Bakery'}.`;
+      
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      if (response.text) {
+        setFormData(prev => ({ ...prev, description: response.text }));
+      } else {
+        alert("Failed to generate description");
+      }
+    } catch (err: any) {
+      console.log("Gemini API Error:", err);
+      const errMsg = err.message || JSON.stringify(err);
+      if (errMsg.includes("403") || errMsg.includes("PERMISSION_DENIED")) {
+        alert("Permission Denied (403): The Gemini API key provided is either restricted (e.g., to Vercel domains) and cannot be used from this preview, or it lacks the Generative Language API permissions.");
+      } else {
+        alert("Failed to generate description. Check your API key and network.");
+      }
+    } finally {
+      setIsGeneratingDesc(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Convert input to SHA-256 Hash
+    setIsCheckingLogin(true);
+    setLoginError('');
     try {
-      const msgBuffer = new TextEncoder().encode(passwordInput);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-      // SHA-256 Hash of 'admin123'
-      const CORRECT_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
-
-      if (hashHex === CORRECT_HASH) {
-        setIsAuthenticated(true);
-        setLoginError('');
+      const docRef = doc(db, 'admin_config', 'auth');
+      const docSnap = await getDoc(docRef);
+      let validPasscode = 'admin123';
+      
+      if (docSnap.exists() && docSnap.data().passcode) {
+        validPasscode = docSnap.data().passcode;
       } else {
-        setLoginError('Incorrect password');
+        await setDoc(docRef, { passcode: 'admin123' }, { merge: true });
+      }
+
+      if (passcode === validPasscode) {
+        setIsAuthenticated(true);
+      } else {
+        setLoginError('Incorrect passcode.');
       }
     } catch (err) {
-      // Fallback for non-secure contexts (e.g. non-localhost HTTP) where crypto.subtle is undefined
-      console.warn("Crypto API not available, using simple check for demo purposes");
-      if (passwordInput === 'admin123') {
-        setIsAuthenticated(true);
-        setLoginError('');
-      } else {
-        setLoginError('Incorrect password');
-      }
+      console.error("Login verification failed:", err);
+      setLoginError('Failed to verify passcode. Please check connection.');
+    } finally {
+      setIsCheckingLogin(false);
     }
+  };
+
+  const handleChangePasscode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPasscode !== confirmPasscode) {
+      setPasscodeMessage('Error: New passcodes do not match.');
+      return;
+    }
+    if (newPasscode.length < 4) {
+      setPasscodeMessage('Error: Passcode must be at least 4 characters.');
+      return;
+    }
+    
+    setIsUpdatingPasscode(true);
+    setPasscodeMessage('');
+    try {
+      const docRef = doc(db, 'admin_config', 'auth');
+      const docSnap = await getDoc(docRef);
+      let validPasscode = 'admin123';
+      
+      if (docSnap.exists() && docSnap.data().passcode) {
+        validPasscode = docSnap.data().passcode;
+      }
+      
+      if (oldPasscode !== validPasscode) {
+        setPasscodeMessage('Error: Old passcode is incorrect.');
+        setIsUpdatingPasscode(false);
+        return;
+      }
+
+      await setDoc(docRef, { passcode: newPasscode }, { merge: true });
+      setPasscodeMessage('Success: Passcode updated successfully!');
+      
+      setTimeout(() => {
+        setPasscodeMessage('');
+        setOldPasscode('');
+        setNewPasscode('');
+        setConfirmPasscode('');
+        setShowPasscodeForm(false);
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setPasscodeMessage('Error: Failed to update passcode.');
+    } finally {
+      setIsUpdatingPasscode(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    setPasscode('');
   };
 
   // --- IMAGE LOGIC ---
@@ -165,33 +265,53 @@ export default function AdminPage() {
       <div className="min-h-screen flex items-center justify-center p-6 animate-pop-in">
         <div className="bg-white p-8 rounded-3xl shadow-2xl border border-pink-100 max-w-sm w-full text-center">
           <div className="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fas fa-lock text-pink-500 text-2xl"></i>
+            <i className="fas fa-shield-halved text-pink-500 text-2xl"></i>
           </div>
           <h2 className="text-2xl font-black text-gray-800 mb-2 font-serif">Admin Access</h2>
-          <p className="text-gray-400 text-sm mb-6">Enter password to manage store</p>
+          <p className="text-gray-400 text-sm mb-6">Enter passcode to manage the store</p>
           
-          <form onSubmit={handleLogin}>
-            <input 
-              type="password" 
-              placeholder="Enter Password"
-              className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:border-pink-500 focus:bg-white transition-all text-center mb-4"
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
-              autoFocus
-            />
-            {loginError && <p className="text-red-500 text-xs font-bold mb-4">{loginError}</p>}
-            
+          <form onSubmit={handleLogin} className="space-y-4 text-left">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Passcode</label>
+              <input 
+                type="password" 
+                value={passcode}
+                onChange={e => setPasscode(e.target.value)}
+                className="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 focus:border-pink-500 outline-none text-sm text-center tracking-widest"
+                placeholder="••••••••"
+                required
+              />
+            </div>
             <button 
-              type="submit" 
-              className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all"
+              type="submit"
+              disabled={isCheckingLogin}
+              className="w-full py-3 bg-pink-500 text-white rounded-xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all hover:bg-pink-600 disabled:opacity-50"
             >
-              Unlock Dashboard
+              {isCheckingLogin ? 'Verifying...' : 'Sign In'}
             </button>
           </form>
+
+          {loginError && (
+            <p className="text-red-500 text-xs font-bold mt-4 leading-relaxed bg-red-50 p-3 rounded-lg border border-red-100">
+              {loginError}
+            </p>
+          )}
           
-          <Link to="/" className="block mt-6 text-gray-400 text-xs hover:text-pink-500">
+          <Link to="/" className="block mt-6 text-gray-400 text-xs hover:text-pink-500 text-center">
             <i className="fas fa-arrow-left mr-1"></i> Back to Shop
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // --- RENDER SYNCING SCREEN ---
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 animate-pop-in">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500 text-sm font-bold">Synchronizing with Cloud Firestore...</p>
         </div>
       </div>
     );
@@ -200,21 +320,47 @@ export default function AdminPage() {
   // --- RENDER DASHBOARD ---
   return (
     <div className="p-4 max-w-4xl mx-auto animate-fade-in-up pb-20">
-      <div className="flex justify-between items-center mb-8 mt-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 font-serif">Store Admin</h1>
-          <p className="text-gray-500 text-sm">Manage your products inventory</p>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 mt-4 gap-4 bg-white p-4 rounded-2xl border border-pink-50 shadow-sm">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold">
+            A
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-800 font-serif">
+              Store Admin
+            </h1>
+          </div>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 self-end md:self-auto">
             <button 
                 onClick={() => {
                 setFormData(emptyProduct);
                 setIsEditing(false);
                 setShowForm(!showForm);
+                setShowPasscodeForm(false);
                 }} 
-                className="bg-pink-500 text-white px-4 py-2 rounded-xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all"
+                className="bg-pink-500 text-white px-4 py-2 rounded-xl font-bold shadow-lg shadow-pink-200 active:scale-95 transition-all text-xs"
             >
                 {showForm ? 'Cancel' : '+ Add Product'}
+            </button>
+            <button 
+                onClick={() => {
+                  setShowPasscodeForm(!showPasscodeForm);
+                  setShowForm(false);
+                  setPasscodeMessage('');
+                  setOldPasscode('');
+                  setNewPasscode('');
+                  setConfirmPasscode('');
+                }}
+                className="bg-gray-800 text-white px-4 py-2 rounded-xl font-bold active:scale-95 transition-all text-xs border border-gray-700 hover:bg-gray-900"
+            >
+                <i className="fas fa-key mr-1"></i> {showPasscodeForm ? 'Close' : 'Passcode'}
+            </button>
+            <button 
+                onClick={handleSignOut}
+                className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-xl font-bold active:scale-95 transition-all text-xs border border-gray-200"
+            >
+                Sign Out
             </button>
         </div>
       </div>
@@ -258,6 +404,66 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* --- CHANGE PASSCODE PANEL --- */}
+      {showPasscodeForm && (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8 animate-pop-in">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 font-serif">Change Admin Passcode</h3>
+          
+          <form onSubmit={handleChangePasscode} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Old Passcode</label>
+              <input 
+                type="password" 
+                placeholder="Current passcode"
+                value={oldPasscode}
+                onChange={e => setOldPasscode(e.target.value)}
+                className="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none focus:border-pink-400 tracking-widest"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">New Passcode</label>
+                <input 
+                  type="password" 
+                  placeholder="New passcode"
+                  value={newPasscode}
+                  onChange={e => setNewPasscode(e.target.value)}
+                  className="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none focus:border-pink-400 tracking-widest"
+                  required
+                  minLength={4}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Confirm Passcode</label>
+                <input 
+                  type="password" 
+                  placeholder="Confirm new passcode"
+                  value={confirmPasscode}
+                  onChange={e => setConfirmPasscode(e.target.value)}
+                  className="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none focus:border-pink-400 tracking-widest"
+                  required
+                  minLength={4}
+                />
+              </div>
+            </div>
+            
+            <button 
+              type="submit"
+              disabled={isUpdatingPasscode}
+              className="w-full py-3 bg-gray-900 text-white rounded-xl text-xs font-bold disabled:opacity-50 hover:bg-gray-800 transition-all active:scale-95"
+            >
+              {isUpdatingPasscode ? 'Updating...' : 'Update Passcode'}
+            </button>
+          </form>
+          {passcodeMessage && (
+            <p className={`text-xs font-bold mt-4 p-3 rounded-lg border ${passcodeMessage.includes('Success') ? 'text-green-600 bg-green-50 border-green-100' : 'text-red-500 bg-red-50 border-red-100'}`}>
+              {passcodeMessage}
+            </p>
+          )}
+        </div>
+      )}
+
       {showForm && (
         <div className="bg-white p-6 rounded-2xl shadow-xl border border-pink-100 mb-10 animate-pop-in">
           <h2 className="text-xl font-bold text-gray-800 mb-6 font-serif">
@@ -290,7 +496,18 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Description</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Description</label>
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  disabled={isGeneratingDesc || !formData.name}
+                  className="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded-md font-bold hover:bg-pink-200 transition-colors disabled:opacity-50 flex items-center"
+                >
+                  <i className={`fas fa-magic mr-1 ${isGeneratingDesc ? 'animate-pulse' : ''}`}></i>
+                  {isGeneratingDesc ? 'Generating...' : 'Auto Generate'}
+                </button>
+              </div>
               <textarea 
                 required
                 rows={3}

@@ -11,8 +11,19 @@ interface CategoryPageProps {
 
 const CategoryPage: React.FC<CategoryPageProps> = ({ wishlist, onToggleWishlist }) => {
   const { id } = useParams<{ id: string }>();
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
   
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="text-center animate-pulse">
+          <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-pink-600 text-sm font-bold tracking-wider uppercase">Loading Products...</p>
+        </div>
+      </div>
+    );
+  }
+
   const filteredProducts = products.filter(p => p.category === id);
 
   return (

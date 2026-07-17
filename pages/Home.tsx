@@ -34,7 +34,7 @@ const calculateRelevance = (query: string, text: string): number => {
 
 export default function Home({ wishlist, onToggleWishlist }: HomeProps) {
   const navigate = useNavigate();
-  const { products, sections } = useProducts();
+  const { products, sections, loading } = useProducts();
   
   const confectioneryProducts = products.filter(p => p.category === 'Confectionery');
 
@@ -71,6 +71,17 @@ export default function Home({ wishlist, onToggleWishlist }: HomeProps) {
   const isFallback = searchQuery.trim().length > 0 && 
                      searchResults.length > 0 && 
                      !products.some(p => calculateRelevance(searchQuery, p.name) > 0);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="text-center animate-pulse">
+          <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-pink-600 text-sm font-bold tracking-wider uppercase">Loading Artisan Bakery...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in-up">

@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Allow read and write for products
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Allow read and write for sections
+    match /sections/{sectionId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Allow read and write for admin configuration
+    match /admin_config/{documentId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
