@@ -5,7 +5,7 @@ import { Product, PaymentTier, Category } from '../types';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { GoogleGenAI } from '@google/genai';
+
 
 // Simple ID generator if uuid isn't available in environment
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -53,22 +53,25 @@ export default function AdminPage() {
     }
     setIsGeneratingDesc(true);
     try {
-      const apiKey = import.meta.env.VITE_API_KEY;
-      if (!apiKey) {
-        alert("VITE_API_KEY environment variable is missing.");
-        setIsGeneratingDesc(false);
-        return;
-      }
-      const ai = new GoogleGenAI({ apiKey });
       const prompt = `Write a short, appetizing, and appealing product description (2-3 sentences) for a bakery item. Name: ${formData.name || 'Unknown item'}. Category: ${formData.category || 'Bakery'}.`;
       
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
       });
 
-      if (response.text) {
-        setFormData(prev => ({ ...prev, description: response.text }));
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || `HTTP error ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.text) {
+        setFormData(prev => ({ ...prev, description: data.text }));
       } else {
         alert("Failed to generate description");
       }
@@ -78,7 +81,7 @@ export default function AdminPage() {
       if (errMsg.includes("403") || errMsg.includes("PERMISSION_DENIED")) {
         alert("Permission Denied (403): The Gemini API key provided is either restricted (e.g., to Vercel domains) and cannot be used from this preview, or it lacks the Generative Language API permissions.");
       } else {
-        alert("Failed to generate description. Check your API key and network.");
+        alert("Failed to generate description. Check your API key and network: " + errMsg);
       }
     } finally {
       setIsGeneratingDesc(false);
